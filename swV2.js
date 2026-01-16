@@ -1,4 +1,4 @@
-self.addEventListener("install", () => {
+/*self.addEventListener("install", () => {
     console.log("Service Worker instalado");
 });
 
@@ -55,4 +55,14 @@ self.addEventListener("notificationclick", event => {
             })
     );
 });
+*/
 
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+
+  const url = event.notification?.data?.url || "./index.html";
+
+  event.waitUntil(
+    clients.openWindow(url)
+  );
+});
