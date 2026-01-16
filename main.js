@@ -27,6 +27,9 @@ if (Notification.permission !== "granted") {
   Notification.requestPermission();
 }
 
+//Nos muestra una notificacion emergente que nos dira el estado de la notificacion
+console.log("Permiso: ", Notification.permission);
+
 // guardar texto
 document.getElementById("send").addEventListener("click", async () => {
   const text = document.getElementById("text").value;
@@ -40,7 +43,7 @@ document.getElementById("send").addEventListener("click", async () => {
 // escuchar cambios en tiempo real
 let lastUpdate = 0;
 
-onSnapshot(docRef, (docSnap) => {
+onSnapshot(docRef, async (docSnap) => {
   if (!docSnap.exists()) return;
 
   const data = docSnap.data();
@@ -48,10 +51,32 @@ onSnapshot(docRef, (docSnap) => {
 
   // evitar notificar al cargar por primera vez
   if (lastUpdate !== 0 && data.updatedAt !== lastUpdate) {
+
+    //Comprobamos que la notificacion esta permitida
+    if (Notification.permission !== "granted") return;
+
+    //Mostramos la notificacion
+    if ("serviceWorker" in navigator) {
+        const reg = await navigator.serviceWorker.ready;
+        await reg.showNotification("🔔 Texto actualizado", {
+          body: "Alguien ha modificado el texto",
+          data: { url: "https://nicocormar13.github.io/Simple-web-notification/"}
+        });
+    } else {
+        new Notification("🔔 Alguien ha modificado el texto", {
+          body: "Alguien ha modificado el texto",
+          data: { url: "https://nicocormar13.github.io/Simple-web-notification/"}
+        });
+    }
+
+    /*Vamo a probar con otro tipo de notificacion, comentamos esta
     if (Notification.permission === "granted") {
       new Notification("🔔 Alguien ha modificado el texto");
-    }
+    }*/
   }
+
+    
+    
 
   lastUpdate = data.updatedAt;
 });
